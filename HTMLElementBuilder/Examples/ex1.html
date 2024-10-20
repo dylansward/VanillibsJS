@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTMLElementBuilder.js Example 1</title>
+</head>
+<body>
+    <script type="module">
+        import HTMLElementBuilder from "../HTMLElementBuilder.js"
+
+        window.addEventListener("load", () => {
+            
+            const pageBody = document.querySelector("body");
+
+            // We can use HTMLElementBuilder without creating our own named object.
+            pageBody.appendChild( new HTMLElementBuilder(document.createElement("h1")) // This constructor takes an HTMLElement
+                .setAttribute("id", "appendedHeading") // Sets the h1's id to "appendedHeading"
+                .Set_innerHTML("Example Page for ") // Sets the HTMLElement property of innerHTML
+                .appendChild( new HTMLElementBuilder("i") // Adds a child element to h1
+                    .Set_innerHTML("HTMLElementBuilder.js")
+                    .ReturnElement() // Used to unwrap the element from the HTMLElementBuilder
+                )
+                .ReturnElement()
+            );
+
+
+            let returnContainer = {};
+            pageBody.appendChild( new HTMLElementBuilder("button") // This constructor can also take the tag of an HTMLElement
+                .RunFunctionOnElement( (el) => {
+                    // We can use .RunFunctionOnElement() to run additional code on our element without
+                    el.innerHTML = "This button has yet to be clicked";
+                    return 0;
+                }, returnContainer, "button_return")
+                .SetElementProperty("autofocus", true) // This sets the HTMLElement's JS property of "autofocus" to true
+                .addEventListener("click", function() { // This adds the function to the event listener for our element
+                    this.innerHTML = `This button has been clicked ${++pressCount} time(s)`;
+                })
+                .ReturnElement()
+            );
+            let pressCount = returnContainer["button_return"];
+
+
+            const blueprint = new HTMLElementBuilder("li")
+                .RunFunctionOnElement( (el) => {
+                    // .RunFunctionOnElement() will only run when the HTMLElementBuilder is being created, not when the HTMLElement is returned.
+                    console.log(el.outerHTML)
+                })
+                .Set_innerHTML("This list item has been generated from a blueprint");
+            
+            pageBody.appendChild( new HTMLElementBuilder("ol")
+                .appendChild(blueprint.ReturnElement().cloneNode(true)) // HTMLElements have a method called cloneNode() which allows us to use the same builder as a blueprint.
+                .appendChild(blueprint.ReturnElement().cloneNode(true))
+                .appendChild(blueprint.ReturnElement().cloneNode(true))
+                .appendChild(blueprint.ReturnElement().cloneNode(true))
+                .appendChild(blueprint.ReturnElement().cloneNode())
+                .ReturnElement()
+            );
+
+        });
+    </script>
+</body>
+</html>
